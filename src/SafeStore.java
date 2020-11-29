@@ -22,14 +22,37 @@ public class SafeStore {
 
     public static void main(String[] args) throws IOException, SQLException, ParserConfigurationException, SAXException {
 
-        String ur="jdbc:postgresql://localhost/";
-        String user="postgres";
-        String password="***********";
+    	 String ur="jdbc:postgresql://localhost/";
+         String user="postgres";
+         String password="***********";
 
         Connection con = DriverManager.getConnection(ur,user,password);
         Statement stmt = con.createStatement();
+        
+        DatabaseMetaData dbm = con.getMetaData();
+		
+		ResultSet tables=dbm.getTables(null, null, "relaxrestaurant", null);
+		
+		if(tables.next()) {
+			stmt.executeUpdate("drop table RelaxRestaurant");
+		}
+		
+		tables=dbm.getTables(null, null, "restaurantdetail", null);
+		
+		if(tables.next()) {
+			stmt.executeUpdate("drop table RestaurantDetail");
+		}
+		
+		tables=dbm.getTables(null, null, "gmoney", null);
+		if(tables.next()) {
+			stmt.executeUpdate("drop table GMoney");
+		}
+		tables.close();
+		
 
-        stmt.executeUpdate("create table RelaxRestaurant (rSeq int, rName varchar(30), zipcode int, category varchar(10), isGMoney bool)");
+        stmt.executeUpdate("create table RelaxRestaurant (rSeq int, rName varchar(50), zipcode int, category varchar(10), isGMoney bool)");
+		stmt.executeUpdate("create table RestaurantDetail (rSeq int, address varchar(100), addressDetail varchar(100), telephone varchar(20))");
+
         String api = "http://211.237.50.150:7080/openapi/2584402a923e0249609a30aa68a450f4c22cf3d2a8af71ca5d1f0b32662c7af6/xml/Grid_20200713000000000605_1/1/1000";
 
         URL url = new URL(api);
@@ -41,23 +64,58 @@ public class SafeStore {
         Document doc = dBuilder.parse(api);
 
         doc.getDocumentElement().normalize();
+        
+        //전체 안심식당 수
+		int totalCnt=Integer.parseInt(getTagValue("totalCnt",doc.getDocumentElement()));
 
-        NodeList nList = doc.getElementsByTagName("row");
 
-        PreparedStatement psmt = con.prepareStatement("INSERT INTO RelaxRestaurant VALUES (?, ?, ?, ?, false)");
+		for(int i=1; i<=totalCnt; i=i+1000) {
+			
+			//1000개씩 가져
+			String api2 = "http://211.237.50.150:7080/openapi/2584402a923e0249609a30aa68a450f4c22cf3d2a8af71ca5d1f0b32662c7af6/xml/Grid_20200713000000000605_1/"
+			+Integer.toString(i)+"/"+Integer.toString(i+999);
+			
+			System.out.println(api2);
+			URL url2 = new URL(api2);
+			HttpURLConnection conn2 = (HttpURLConnection) url2.openConnection();
+			
+			conn2.setRequestMethod("GET");
+			
+			DocumentBuilderFactory dbFactoty2= DocumentBuilderFactory.newInstance();
+			DocumentBuilder dBuilder2 = dbFactoty2.newDocumentBuilder();
+			Document doc2 = dBuilder.parse(api2);
+			
+			doc2.getDocumentElement().normalize();
+			
+			NodeList nList = doc2.getElementsByTagName("row");
+						
+			PreparedStatement psmt = con.prepareStatement("INSERT INTO RelaxRestaurant VALUES (?, ?, ?, ?, false)");
+			PreparedStatement psmt2 = con.prepareStatement("INSERT INTO RestaurantDetail VALUES (?, ?, ?, ?)");
+			
+			//db저
+			for(int temp = 0; temp < nList.getLength(); temp++){
+				Node nNode = nList.item(temp);
+				if(nNode.getNodeType() == Node.ELEMENT_NODE){
+					
+					Element eElement = (Element) nNode;
+					
+					psmt.setInt(1, Integer.parseInt(getTagValue("RELAX_SEQ", eElement)));
+					psmt.setString(2, getTagValue("RELAX_RSTRNT_NM", eElement));
+					psmt.setInt(3, Integer.parseInt(getTagValue("RELAX_ZIPCODE", eElement)));
+					psmt.setString(4, getTagValue("RELAX_GUBUN_DETAIL", eElement));
+					psmt.executeUpdate();
+					
+					psmt2.setInt(1, Integer.parseInt(getTagValue("RELAX_SEQ", eElement)));
+					psmt2.setString(2, getTagValue("RELAX_ADD1", eElement));
+					psmt2.setString(3, getTagValue("RELAX_ADD2", eElement));
+					psmt2.setString(4, getTagValue("RELAX_RSTRNT_TEL", eElement));
+					psmt2.executeUpdate();
 
-        for(int temp = 0; temp < nList.getLength(); temp++) {
-            Node nNode = nList.item(temp);
-            if(nNode.getNodeType() == Node.ELEMENT_NODE) {
-
-                Element eElement = (Element) nNode;
-                psmt.setInt(1, Integer.parseInt(getTagValue("RELAX_SEQ", eElement)));
-                psmt.setString(2, getTagValue("RELAX_RSTRNT_NM", eElement));
-                psmt.setInt(3, Integer.parseInt(getTagValue("RELAX_ZIPCODE", eElement)));
-                psmt.setString(4, getTagValue("RELAX_GUBUN_DETAIL", eElement));
-                psmt.executeUpdate();
-            }	// for end
-        }	// if end
+					
+				}	
+			}
+			
+		}
 
         //지역화폐 //GMoney table create
         stmt.executeUpdate("create table GMoney (sidoName varchar(30), rName varchar(70))");
