@@ -25,7 +25,7 @@ public class SafeStore {
 
     	String ur="jdbc:postgresql://localhost/";
     	String user="postgres";
-    	String password="skdud142399";
+    	String password="***********";
 
 		String city;
 		int num;
