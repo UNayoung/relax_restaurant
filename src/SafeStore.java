@@ -23,9 +23,13 @@ public class SafeStore {
 
     public static void main(String[] args) throws IOException, SQLException, ParserConfigurationException, SAXException {
 
-    	String ur="jdbc:postgresql://localhost/";
+//    	String ur="jdbc:postgresql://localhost/";
+		String ur="jdbc:postgresql://127.0.0.1:5433/test";
+
     	String user="postgres";
-    	String password="***********";
+//    	String password="***********";
+    	String password="1234";
+
 
 		String city;
 		int num;
@@ -33,15 +37,39 @@ public class SafeStore {
 
 		Scanner scan = new Scanner(System.in);
 
-		Connection con = DriverManager.getConnection(ur,user,password);
+		Connection con;
+		
+		try 
+	      {
+	         // connection establish 하기
+	         con = DriverManager.getConnection(ur, user, password);
+	           
+	      }
+	      catch (SQLException e) 
+	      {
+	         System.out.println("Connection Failed Check output console");
+	         e.printStackTrace();
+	         return; 
+	      }
+	      
+	      if (con != null)
+	      {
+	         System.out.println("Connection Success");
+	      } 
+	      else 
+	      {
+	         System.out.println("Failed to make conn");
+	      }
+	      
         Statement stmt = con.createStatement();
         
         DatabaseMetaData dbm = con.getMetaData();
 		
 		ResultSet tables=dbm.getTables(null, null, "relaxrestaurant", null);
 		
+		// 이미 table이 있다면 Drop
 		if(tables.next()) {
-			stmt.executeUpdate("drop table RelaxRestaurant");
+			stmt.executeUpdate("drop table RelaxRestaurant cascade");
 		}
 		
 		tables=dbm.getTables(null, null, "restaurantdetail", null);
@@ -56,14 +84,18 @@ public class SafeStore {
 		}
 
 		tables = dbm.getTables(null, null, "region", null);
-
 		if(tables.next()) {
 			stmt.executeUpdate("drop table Region");
+		}
+		
+		tables = dbm.getTables(null, null, "relaxregion", null);
+		if(tables.next()) {
+			stmt.executeUpdate("drop view RelaxRegion");
 		}
 
 		tables.close();
 
-
+		
 		stmt.executeUpdate("create table Region (zipcode int, siName varchar(10), sidoName varchar(10), primary key(zipcode))");
 		stmt.executeUpdate("create table RelaxRestaurant (rSeq int, rName varchar(70), zipcode int, category varchar(10), isGMoney bool)");
 		stmt.executeUpdate("create table RestaurantDetail (rSeq int, address varchar(100), addressDetail varchar(100), telephone varchar(20))");
@@ -131,6 +163,10 @@ public class SafeStore {
 			}
 			
 		}
+		System.out.println("create RelaxRestaurant");
+		System.out.println("create RestaurantDetail");
+
+
 
 		NodeList nList = doc.getElementsByTagName("row");
 
@@ -370,11 +406,15 @@ public class SafeStore {
 
 			}
 		}
+		System.out.println("create Region");
 
         //지역화폐 //GMoney table create
         stmt.executeUpdate("create table GMoney (sidoName varchar(30), rName varchar(70))");
 
-        File csv = new File("C:\\Users\\우나영\\Desktop\\데이터베이스\\지역화폐가맹점현황\\지역화폐가맹점현황_final.csv"); //파일 경로 설정
+//        File csv = new File("C:\\Users\\우나영\\Desktop\\데이터베이스\\지역화폐가맹점현황\\지역화폐가맹점현황_final.csv"); //파일 경로 설정
+        String path = System.getProperty("user.dir");
+        
+        File csv = new File(path+"/지역화폐가맹점현황.csv");
         BufferedReader br = new BufferedReader(new FileReader(csv));
         String line = "";
 
@@ -393,39 +433,37 @@ public class SafeStore {
             }
         }
         br.close();
+		System.out.println("create GMoney");
+		
+		stmt.executeUpdate("create view RelaxRegion as "
+				+ "select sidoName,rName,isGMoney from RelaxRestaurant natural join Region;");
+		
+		stmt.executeUpdate("create or replace function test()\n"
+				+ "returns trigger as $$\n"
+				+ "begin\n"
+				+ "update RelaxRestaurant\n"
+				+ "set isGMoney='TRUE'\n"
+				+ "from GMoney,Region\n"
+				+ "where RelaxRestaurant.rName=GMoney.rName and Region.sidoName=GMoney.sidoName "
+				+ "and isGMoney='FALSE';\n"
+				+ "return null;\n"
+				+ "end;					\n"
+				+ "$$\n"
+				+ "language 'plpgsql';");
+		
+		stmt.executeUpdate("create trigger RelaxRegionupdate\n"
+				+ "instead of update on RelaxRegion\n"
+				+ "for each row execute procedure test();");
+		
+		stmt.executeUpdate("update RelaxRegion set isGMoney='TRUE'\n"
+				+ "from GMoney\n"
+				+ "where RelaxRegion.rName = GMoney.rName and RelaxRegion.sidoName=GMoney.sidoName;");
+		
+		
 
-		//기능
-		System.out.println("안심식당 정보 제공 서비스");
-		System.out.println("--------------------------------------");
-		System.out.println("기능");
-		System.out.println("1. 지역 및 음식점 종류별 안심식당 정보 탐색");
-		System.out.println("2. 안심식당 검색");
-		System.out.println("3. 상세 정보 제공 (+지역화폐 가맹점 유무)");
-		int function_choice = scan.nextInt();
-		if(function_choice == 1) {
-		}
-		else if (function_choice == 2) {
-			System.out.println("2. 안심식당 검색 을 선택하셨습니다.");
-			System.out.println("검색을 원하는 안심식당을 입력하세요.");
-			String store = scan.next();
-			store += "%";
-			String query_store = null;
-			query_store = "select rName, sidoName from Relaxrestaurant natural join Region where rName like ? order by rName";
-			PreparedStatement psmt_store = con.prepareStatement(query_store);
 
-			psmt_store.clearParameters();
-			psmt_store.setString(1, store);
+        
+        System.out.println("Table 생성 완료");
 
-			ResultSet result_store = psmt_store.executeQuery();
-
-			while (result_store.next()) {
-				String rName = result_store.getString("rname");
-				String sidoName = result_store.getString("sidoname");
-
-				System.out.println(rName + "\t" + sidoName);
-			}
-		}
-		else if (function_choice == 3) {
-		}
     }
 }
