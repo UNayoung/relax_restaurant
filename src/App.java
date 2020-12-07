@@ -31,7 +31,7 @@ public class App {
 			      
 			      if (con != null)
 			      {
-			         System.out.println("Connection Success");
+//			         System.out.println("Connection Success");
 			      } 
 			      else 
 			      {
@@ -42,57 +42,53 @@ public class App {
 
 				System.out.println("안심식당 정보 제공 서비스");
 				System.out.println("--------------------------------------");
-				System.out.println("기능");
 				System.out.println("1. 지역 및 음식점 종류별 안심식당 정보 탐색");
 				System.out.println("2. 안심식당 검색");
-				System.out.println("3. 상세 정보 제공 (+지역화폐 가맹점 유무)");
-				int function_choice = scan.nextInt();
-				if(function_choice == 1)
-					try {
-						
+				System.out.println("3. 종료");
+
+				
+				while(true) {
+					
+					int function_choice = scan.nextInt();
+					
+					if(function_choice == 1) {
+						try {
 							Region region = new Region();
-							region.main(con);
-							
+							region.main(con);	
 						
 					} catch (SQLException e) {
 						// TODO Auto-generated catch block
 						e.printStackTrace();
 					}
-				else if (function_choice == 2) {
-					try {
 						
-						RelaxRestaurant rstrnt=new RelaxRestaurant();
-						rstrnt.main(con);
-						
-					
-					} catch (SQLException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
 					}
+						
+					else if (function_choice == 2) {
+						try {
+							
+							RelaxRestaurant rstrnt=new RelaxRestaurant();
+							rstrnt.main(con);
+							
+						
+						} catch (SQLException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+						}
+						
+						
+					}
+					else if (function_choice == 3) {
+						System.out.println("프로그램을 종료합니다.");
+						
+						return;
 					
-//					System.out.println("2. 안심식당 검색 을 선택하셨습니다.");
-//					System.out.println("검색을 원하는 안심식당을 입력하세요.");
-//					String store = scan.next();
-//					store += "%";
-//					String query_store = null;
-//					query_store = "select rName, sidoName from Relaxrestaurant natural join Region where rName like ? order by rName";
-//					PreparedStatement psmt_store = con.prepareStatement(query_store);
-//
-//					psmt_store.clearParameters();
-//					psmt_store.setString(1, store);
-//
-//					ResultSet result_store = psmt_store.executeQuery();
-//
-//					while (result_store.next()) {
-//						String rName = result_store.getString("rname");
-//						String sidoName = result_store.getString("sidoname");
-//
-//						System.out.println(rName + "\t" + sidoName);
-//					}
-					
+					}
+					else {
+						System.out.println("잘못된 입력입니다.");
+
+					}
 				}
-				else if (function_choice == 3) {
-				}
+			
 	}
 
 }
