@@ -104,7 +104,7 @@ public class Region {
 			
 			System.out.printf("*****%s %s 음식점 개수: %d개***** \n", sido , sigungu, totalCount);
 			//System.out.println("[음식 종류]");
-			System.out.println("일식         서양식         한식         중식");
+			System.out.println("일식      서양식      한식      중식      기타외국식      기타 음식점업");
 			
 			System.out.println("\n");
 			System.out.println("원하는 음식 종류를 입력하세요.");
@@ -158,11 +158,21 @@ public class Region {
 					while (r.next()) {
 						
 						if(r.getString("addressdetail")==null) {
-							System.out.println(r.getString("rName")+" "+r.getString("address")+" "+r.getString("telephone")+" ");
+							if (r.getString("telephone")==null) {
+								System.out.println(r.getString("rName") + " " + r.getString("address") + " ");
+							}
+							else {
+								System.out.println(r.getString("rName") + " " + r.getString("address") + " " + r.getString("telephone") + " ");
+							}
 						}
 						else {
-							System.out.println(r.getString("rName")+" "+r.getString("address")+" "+r.getString("addressdetail")+" "
-									+r.getString("telephone")+" ");
+							if (r.getString("telephone")==null) {
+								System.out.println(r.getString("rName") + " " + r.getString("address") + " " + r.getString("addressdetail") + " ");
+							}
+							else {
+								System.out.println(r.getString("rName") + " " + r.getString("address") + " " + r.getString("addressdetail") + " "
+										+ r.getString("telephone") + " ");
+							}
 						}
 						
 						if(r.getBoolean("isGMoney")==true) {
@@ -188,7 +198,7 @@ public class Region {
 			
 			while(true) {
 				
-				System.out.println("안심식당 정보 제공 서비스");
+				System.out.println("\n안심식당 정보 제공 서비스");
 				System.out.println("--------------------------------------");
 				System.out.println("1. 다시 검색하기");
 				System.out.println("2. 종료");
@@ -205,8 +215,8 @@ public class Region {
 				}
 				else if(choice==2){
 					System.out.println("프로그램을 종료합니다.");
-					
-					return;
+
+					System.exit(0);
 				}
 				else {
 					System.out.println("잘못된 입력입니다.");

@@ -27,7 +27,7 @@ public class SafeStore {
 		String ur="jdbc:postgresql://127.0.0.1:5433/test";
 
     	String user="postgres";
-//    	String password="***********";
+//    	String password="*****";
     	String password="1234";
 
 
@@ -198,8 +198,9 @@ public class SafeStore {
 
 //        File csv = new File("C:\\Users\\우나영\\Desktop\\데이터베이스\\지역화폐가맹점현황\\지역화폐가맹점현황_final.csv"); //파일 경로 설정
         String path = System.getProperty("user.dir");
-        
-        File csv = new File(path+"/지역화폐가맹점현황.csv");
+
+        File csv = new File(path+"/지역화폐가맹점현황.csv");
+//        File csv = new File(path+"/지역화폐가맹점현황.csv");
         BufferedReader br = new BufferedReader(new FileReader(csv));
         String line = "";
 

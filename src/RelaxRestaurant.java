@@ -60,11 +60,21 @@ public class RelaxRestaurant {
 						while (r.next()) {
 							
 							if(r.getString("addressdetail")==null) {
-								System.out.println(r.getString("rName")+" "+r.getString("address")+" "+r.getString("telephone")+" ");
+								if(r.getString("telephone")==null) {
+									System.out.println(r.getString("rName") + " " + r.getString("address") + " ");
+								}
+								else {
+									System.out.println(r.getString("rName") + " " + r.getString("address") + " " + r.getString("telephone") + " ");
+								}
 							}
 							else {
-								System.out.println(r.getString("rName")+" "+r.getString("address")+" "+r.getString("addressdetail")+" "
-										+r.getString("telephone")+" ");
+								if(r.getString("telephone")==null) {
+									System.out.println(r.getString("rName") + " " + r.getString("address") + " " + r.getString("addressdetail") + " ");
+								}
+								else {
+									System.out.println(r.getString("rName") + " " + r.getString("address") + " " + r.getString("addressdetail") + " "
+											+ r.getString("telephone") + " ");
+								}
 							}
 							
 							if(r.getBoolean("isGMoney")==true) {
@@ -88,7 +98,7 @@ public class RelaxRestaurant {
 			
 			while(true) {
 				
-				System.out.println("안심식당 정보 제공 서비스");
+				System.out.println("\n안심식당 정보 제공 서비스");
 				System.out.println("--------------------------------------");
 				System.out.println("1. 다시 검색하기");
 				System.out.println("2. 종료");
@@ -106,8 +116,8 @@ public class RelaxRestaurant {
 				}
 				else if(choice==2){
 					System.out.println("프로그램을 종료합니다.");
-					
-					return;
+
+					System.exit(0);
 				}
 				else {
 					System.out.println("잘못된 입력입니다.");

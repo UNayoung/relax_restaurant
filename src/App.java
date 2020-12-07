@@ -6,13 +6,16 @@ public class App {
 
 	public static void main(String[] args) throws Exception {
 		// TODO Auto-generated method stub
+		SafeStore ss = new SafeStore();
+		ss.main(args);
 
 		//기능
 		
 				String ur="jdbc:postgresql://127.0.0.1:5433/test";
+//		String ur="jdbc:postgresql://localhost/";
 
 				String user="postgres";
-//    	String password="***********";
+//    	String password="*****";
 				String password="1234";
 				Connection con = null;
 
@@ -40,13 +43,12 @@ public class App {
 
 				Scanner scan = new Scanner(System.in);
 
-				System.out.println("안심식당 정보 제공 서비스");
+				System.out.println("\n안심식당 정보 제공 서비스");
 				System.out.println("--------------------------------------");
 				System.out.println("1. 지역 및 음식점 종류별 안심식당 정보 탐색");
 				System.out.println("2. 안심식당 검색");
 				System.out.println("3. 종료");
 
-				
 				while(true) {
 					
 					int function_choice = scan.nextInt();
@@ -80,7 +82,7 @@ public class App {
 					else if (function_choice == 3) {
 						System.out.println("프로그램을 종료합니다.");
 						
-						return;
+						System.exit(0);
 					
 					}
 					else {
