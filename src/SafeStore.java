@@ -23,12 +23,12 @@ public class SafeStore {
 
     public static void main(String[] args) throws IOException, SQLException, ParserConfigurationException, SAXException {
 
-//    	String ur="jdbc:postgresql://localhost/";
-		String ur="jdbc:postgresql://127.0.0.1:5433/test";
+    	String ur="jdbc:postgresql://localhost/";
+//		String ur="jdbc:postgresql://127.0.0.1:5433/test";
 
     	String user="postgres";
-//    	String password="*****";
-    	String password="1234";
+    	String password="*****";
+//    	String password="1234";
 
 
 		String city;
@@ -90,7 +90,7 @@ public class SafeStore {
 		
 		tables = dbm.getTables(null, null, "relaxregion", null);
 		if(tables.next()) {
-			stmt.executeUpdate("drop table RelaxRegion");
+			stmt.executeUpdate("drop table RelaxRegion cascade");
 		}
 
 		tables.close();
@@ -222,13 +222,35 @@ public class SafeStore {
 		System.out.println("create GMoney");
 		
 		
-        stmt.executeUpdate("create table RelaxRegion as\n"
-        		+ "select * from RelaxRestaurant natural join Region;");
-
-		stmt.executeUpdate("update RelaxRegion "
+//        stmt.executeUpdate("create table RelaxRegion as\n"
+//        		+ "select * from RelaxRestaurant natural join Region;");
+//
+//		stmt.executeUpdate("update RelaxRegion "
+//				+ "set isGMoney='TRUE'\n"
+//				+ "from GMoney\n"
+//				+ "where RelaxRegion.rName like '%'||GMoney.rName||'%' and RelaxRegion.sidoName=GMoney.sidoName;");
+		
+		stmt.executeUpdate("create table RelaxRegion as "
+				+ "select * from RelaxRestaurant natural join Region;");
+		
+		stmt.executeUpdate("create or replace function test()\n"
+				+ "returns trigger as $$\n"
+				+ "begin\n"
+				+ "update RelaxRestaurant\n"
 				+ "set isGMoney='TRUE'\n"
+				+ "where rSeq in (select rSeq from RelaxRegion where isGMoney='TRUE'); "
+				+ "return null;\n"
+				+ "end;					\n"
+				+ "$$\n"
+				+ "language 'plpgsql';");
+		
+		stmt.executeUpdate("create trigger RelaxRegionupdate\n"
+				+ "after update on RelaxRegion\n"
+				+ "for each row execute procedure test();");
+		
+		stmt.executeUpdate("update RelaxRegion set isGMoney='TRUE'\n"
 				+ "from GMoney\n"
-				+ "where RelaxRegion.rName like '%'||GMoney.rName||'%' and RelaxRegion.sidoName=GMoney.sidoName;");
+				+ "where RelaxRegion.rName = GMoney.rName and RelaxRegion.sidoName=GMoney.sidoName;");
 		
 		System.out.println("update RelaxRestaurant");
 		

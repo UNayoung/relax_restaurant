@@ -35,7 +35,7 @@ public class Region {
 			
 			String CounterViewWithRollUp = "create view Counter as" + "\n" +
 										   "select siName, sidoName, category, count(*)" + "\n" +
-										   "from RelaxRestaurant natural join Region" + "\n" +
+										   "from RelaxRegion" + "\n" +
 										   "group by rollup(siName, sidoName, category)" + "\n" +
 										   "order by siName, sidoName, category";
 			stmt.executeUpdate(CounterViewWithRollUp);
@@ -123,7 +123,7 @@ public class Region {
 			
 			String SafeStoreView ="create view SafeStore as" +"\n" +
 		   			  			  "select rName, rSeq" +"\n" +
-		   			  			  "from RelaxRestaurant natural join Region" +"\n" + 
+		   			  			  "from RelaxRegion" +"\n" + 
 		   			  			  "where siName = "+ "'"+sido+"'"+"and sidoName = "+ "'"+sigungu+"'"+ "and category = "+ "'"+type+"'";
 			stmt.executeUpdate(SafeStoreView);
 
@@ -147,7 +147,7 @@ public class Region {
 				
 				int num=scan.nextInt();
 				
-				String query="select * from RestaurantDetail natural join RelaxRegion "
+				String query="select * from RestaurantDetail natural join RelaxRestaurant "
 						+ "where rSeq= ? ";
 				
 				PreparedStatement p= con.prepareStatement(query);

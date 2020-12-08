@@ -48,7 +48,7 @@ public class RelaxRestaurant {
 					
 					int num=scan.nextInt();
 					
-					String query="select * from RestaurantDetail natural join RelaxRegion "
+					String query="select * from RestaurantDetail natural join RelaxRestaurant "
 							+ "where rSeq= ? ";
 					
 					PreparedStatement p= con.prepareStatement(query);

@@ -6,11 +6,7 @@ public class App {
 
 	public static void main(String[] args) throws Exception {
 		// TODO Auto-generated method stub
-		SafeStore ss = new SafeStore();
-		ss.main(args);
 
-		//기능
-		
 				String ur="jdbc:postgresql://127.0.0.1:5433/test";
 //		String ur="jdbc:postgresql://localhost/";
 
